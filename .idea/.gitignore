@@ -1,0 +1,11 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+resume.txt
+profile.json
+service-account.json
+.env
+.venv/
+__pycache__/
+*.pyc
+

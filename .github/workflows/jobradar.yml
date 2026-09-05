@@ -1,0 +1,61 @@
+name: Job radar
+
+on:
+  schedule:
+    # 08:30 IST daily (GitHub cron is UTC)
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Print results instead of sending"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # needed to commit data/seen.json back
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # resume.txt and profile.json are gitignored, so they live as secrets.
+      - name: Materialise private inputs
+        run: |
+          printf '%s' "$RESUME_TEXT" > resume.txt
+          printf '%s' "$PROFILE_JSON" > profile.json
+        env:
+          RESUME_TEXT: ${{ secrets.RESUME_TEXT }}
+          PROFILE_JSON: ${{ secrets.PROFILE_JSON }}
+
+      - name: Run
+        run: python src/main.py ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
+          CAREERJET_AFFID: ${{ secrets.CAREERJET_AFFID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+
+      - name: Persist seen-jobs state
+        if: ${{ !inputs.dry_run }}
+        run: |
+          rm -f resume.txt profile.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/seen.json
+          git diff --staged --quiet || git commit -m "chore: update seen jobs [skip ci]"
+          git push

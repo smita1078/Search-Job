@@ -1,0 +1,27 @@
+{
+  "target_roles": [
+    "Backend Engineer",
+    "Software Development Engineer (SDE-1 / SDE-2)",
+    "Senior Software Engineer"
+  ],
+  "seniority": "2 years experience; targeting SDE-1 to SDE-2 / mid-level backend roles",
+  "locations": ["Pune", "Bangalore", "Hyderabad", "Remote"],
+
+  "must_have_any": ["java", "spring", "backend", "microservice", "sde"],
+
+  "nice_to_have": [
+    "spring boot", "rest api", "kafka", "docker", "kubernetes",
+    "postgres", "sql", "aws", "junit", "maven", "open source", "distributed"
+  ],
+
+  "exclude_title_keywords": [
+    "intern", "fresher", "trainee", "manager", "architect", "director",
+    "sales", "recruiter", "qa", "tester", "support", "frontend", "ui/ux"
+  ],
+
+  "exclude_keywords": ["walk-in", "commission only", "unpaid"],
+
+  "max_years_experience_in_jd": 6,
+
+  "notes": "Prefer product companies over service/consultancy. Strong Java + Spring Boot background in investment-banking microservices. Active open-source contributor. Open to relocation within India; not looking for on-site-only roles in tier-3 cities."
+}

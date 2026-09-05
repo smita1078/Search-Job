@@ -1,0 +1,36 @@
+# Which source adapters to run. Remove any you don't have a key for.
+sources:
+  - adzuna
+  - jooble
+  - careerjet
+
+# Each query runs against every location, against every source.
+# Cost: len(queries) x len(locations) x len(sources) API calls per run.
+# Currently 8 x 4 x 3 = 96. Trim locations first if that's too many.
+queries:
+  - "java backend"
+  - "spring boot"
+  - "java developer"
+  - "backend developer"
+  - "sdet"
+  - "software engineer in test"
+  - "test automation java"
+  - "automation engineer"
+
+locations:
+  - "Pune"
+  - "Bangalore"
+  - "Hyderabad"
+  - "India"
+
+# Cap on how many jobs go to the LLM per run (controls cost).
+llm_batch_cap: 45
+
+# Only report jobs scoring at least this out of 10.
+min_score: 6
+
+# How many make it into the email digest (the sheet gets all of them).
+email_top_n: 15
+
+# How long to remember a job id before it could resurface.
+retain_days: 60
