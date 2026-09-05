@@ -1,4 +1,4 @@
-# Job radar
+# Job Search
 
 Daily job search on autopilot. Pulls fresh backend/SDE postings from three
 aggregator APIs, scores each one against your actual resume with an LLM, then
