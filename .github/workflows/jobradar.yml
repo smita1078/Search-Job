@@ -43,6 +43,8 @@ jobs:
           ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
           JOOBLE_API_KEY: ${{ secrets.JOOBLE_API_KEY }}
           CAREERJET_AFFID: ${{ secrets.CAREERJET_AFFID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
@@ -58,4 +60,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/seen.json
           git diff --staged --quiet || git commit -m "chore: update seen jobs [skip ci]"
-          git push
+          # You may have pushed while this run was in flight -- rebase onto
+          # whatever is on the remote now rather than failing the whole job.
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "push attempt $i failed, retrying"
+            sleep 5
+          done
+          echo "could not push seen.json; jobs will be re-reported next run"
