@@ -30,7 +30,20 @@ def push_to_sheet(jobs):
         json.loads(creds_json),
         scopes=["https://www.googleapis.com/auth/spreadsheets"],
     )
-    ws = gspread.authorize(creds).open_by_key(sheet_id).sheet1
+    client = gspread.authorize(creds)
+
+    # Sheets returns 5xx fairly often; a single blip shouldn't lose a run.
+    ws = None
+    for attempt in range(4):
+        try:
+            ws = client.open_by_key(sheet_id).sheet1
+            break
+        except Exception as e:
+            if attempt == 3:
+                raise
+            wait = 5 * (2 ** attempt)
+            log.warning("Sheets unavailable (%s), retrying in %ds", e, wait)
+            time.sleep(wait)
 
     if not ws.get_all_values():
         ws.append_row(HEADERS)
