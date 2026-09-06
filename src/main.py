@@ -70,13 +70,26 @@ def main():
             print(f"     {j['url']}\n")
         return
 
+    delivered = False
     if keepers:
-        sinks.push_to_sheet(keepers)
-        sinks.send_email(keepers, top_n=cfg.get("email_top_n", 15))
+        # Each sink is independent: a failing sheet shouldn't cost you the
+        # email, and vice versa.
+        for name, fn in (
+            ("sheet", lambda: sinks.push_to_sheet(keepers)),
+            ("email", lambda: sinks.send_email(keepers, top_n=cfg.get("email_top_n", 15))),
+        ):
+            try:
+                fn()
+                delivered = True
+            except Exception as e:
+                log.error("Delivery to %s failed: %s", name, e)
 
-    # Mark everything we fetched as seen, not just the keepers -- otherwise
-    # low-scoring jobs get re-scored (and re-billed) every single day.
-    save_seen(seen, [j["id"] for j in fresh])
+    # Only forget these jobs once they actually reached you. If every sink
+    # failed, leave them unseen so tomorrow's run tries again.
+    if delivered or not keepers:
+        save_seen(seen, [j["id"] for j in fresh])
+    else:
+        log.warning("Nothing delivered -- not marking jobs as seen")
 
 
 if __name__ == "__main__":
